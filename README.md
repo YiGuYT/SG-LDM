@@ -6,4 +6,7 @@ This is the reporsitory for the implementation of our ICCV paper: SG-LDM: Semant
 We are preparing the code for upload, please stay tuned.
 
 ## Model Overview
-![Model Overview](assets/model-overview.png)
+![Model Overview](assets/model-overview.jpg)
+
+## Qualitative Comparison  
+![Qualitative Comparison](assets/qualitative-comparison.jpg)
