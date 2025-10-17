@@ -249,7 +249,7 @@ class point_cloud_to_range_image_KITTI_vanilla(point_cloud_to_range_image):
         return point_cloud
 
 
-class SemanticKITTIRangeVanillaDataset(RangeDataset):
+class SemanticKITTIDataset(RangeDataset):
     """
     Dataset class for SemanticKITTI that also loads labels and
     projects them to the range image.
@@ -397,7 +397,7 @@ class SemanticKITTIRangeVanillaDataset(RangeDataset):
         return ret
 
 
-class SemanticKITTIRangeVanillaLoader(RangeLoader):
+class SemanticKITTILoader(RangeLoader):
     """
     DataLoader class for SemanticKITTI, now returning range images + label images.
     """
@@ -415,7 +415,7 @@ class SemanticKITTIRangeVanillaLoader(RangeLoader):
                  **kwargs):
         super().__init__(**kwargs)
 
-        self.train_dataset = SemanticKITTIRangeVanillaDataset(
+        self.train_dataset = SemanticKITTIDataset(
             SEMANTIC_KITTI_path, 
             train=True,
             used_feature=used_feature,
@@ -429,7 +429,7 @@ class SemanticKITTIRangeVanillaLoader(RangeLoader):
             coord=coord
         )
 
-        self.test_dataset = SemanticKITTIRangeVanillaDataset(
+        self.test_dataset = SemanticKITTIDataset(
             SEMANTIC_KITTI_path, 
             train=False,
             used_feature=used_feature, 

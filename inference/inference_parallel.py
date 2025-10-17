@@ -9,7 +9,7 @@ import torch.nn as nn
 import safetensors
 from diffusers import DDPMScheduler, UNet2DModel
 from diffusers.models import AutoencoderKL
-from data.sk import SemanticKITTIRangeVanillaLoader
+from data.sk import SemanticKITTILoader
 from model.pipelines import DDIMPipelineRangeSemantic
 from utils.utils import replace_attn, replace_conv, replace_down
 from accelerate import PartialState
@@ -48,7 +48,7 @@ def main():
     # ------------------------------------------------
     # 2) Prepare DataLoader
     # ------------------------------------------------
-    loader = SemanticKITTIRangeVanillaLoader(
+    loader = SemanticKITTILoader(
         os.environ.get('SemanticKITTI_DATASET'),
         batch_size=args.batch_size,
         num_workers=args.dataloader_num_workers
@@ -107,11 +107,6 @@ def main():
         # shape: (B, num_classes, W, H)
         onehot_sem_map = batch["onehot_sem"].to(device)
         origin_sem_map = batch["origin_sem"].to(device)
-        # We expect the pipeline to return something like:
-        #   {
-        #     "sample": <range_image> (B, 1 or 2, W, H),
-        #     "label":  <label_range>  (B, num_classes, W, H)  (or maybe (B,1,W,H))
-        #   }
         onehot_sem_map = channel_mapper(onehot_sem_map)
         out = pipe(
             generator=generator,
@@ -125,26 +120,12 @@ def main():
         label_imgs = origin_sem_map.squeeze(1)
 
         # ============================
-        # (C) Optionally apply scaling shifts
-        # ============================
-        if hasattr(args, 'scaling_factor'):
-            range_imgs = range_imgs / args.scaling_factor
-        if hasattr(args, 'shifting_factor'):
-            range_imgs = range_imgs + args.shifting_factor
-        if getattr(args, 'Waymo', False):
-            # Example slicing if your net outputs a bigger range map
-            range_imgs = range_imgs[:, :, 3:2653, :]
-
-        # ============================
         # (D) Convert range image -> 3D points
         # ============================
         pc_all = to_range.to_pc_torch(range_imgs)  # (B, N, 3 or 4)
 
-        # If generating 3D labels, flatten label_imgs consistently
-        if label_imgs is not None:
-            # label_imgs: (B, W, H)
-            B, W, H = label_imgs.shape
-            label_imgs_flat = label_imgs.reshape(B, W*H)  # (B, N)
+        B, W, H = label_imgs.shape
+        label_imgs_flat = label_imgs.reshape(B, W*H)  # (B, N)
 
         # ------------------------------------------------
         # 7) Save in "sequences/XX/velodyne/XXXXXX.bin" + label
@@ -169,20 +150,16 @@ def main():
             # Save the generated point cloud
             pc_np.astype(np.float32).tofile(out_bin_path)
 
-            # ------------------------
-            # If we have a label map, convert & save in 3D
-            # ------------------------
-            if label_imgs is not None:
-                lbl_np = label_imgs_flat[j].detach().cpu().numpy()  # shape (N,)
-                lbl_np = lbl_np[mask]  # same mask as geometry
-                # Cast to uint32 for .label file
-                lbl_np = lbl_np.astype(np.uint32)
+            lbl_np = label_imgs_flat[j].detach().cpu().numpy()  # shape (N,)
+            lbl_np = lbl_np[mask]  # same mask as geometry
+            # Cast to uint32 for .label file
+            lbl_np = lbl_np.astype(np.uint32)
 
-                # Construct .label path
-                label_filename = file_id.replace('.bin', '.label')  # e.g. "000123.label"
-                out_label_path = os.path.join(args.out, "sequences", seq_id, "labels", label_filename)
-                os.makedirs(os.path.dirname(out_label_path), exist_ok=True)
-                lbl_np.tofile(out_label_path)
+            # Construct .label path
+            label_filename = file_id.replace('.bin', '.label')  # e.g. "000123.label"
+            out_label_path = os.path.join(args.out, "sequences", seq_id, "labels", label_filename)
+            os.makedirs(os.path.dirname(out_label_path), exist_ok=True)
+            lbl_np.tofile(out_label_path)
 
     if distributed_state.is_main_process:
         print("Inference complete!")
