@@ -35,10 +35,10 @@ We provide generated samples for the **SemanticKITTI Sequence 08** benchmark. Th
 
 Each sample follows the same directory and naming convention as the SemanticKITTI dataset for easy comparison and evaluation.
 
-## Qualitative Comparison
+## 🖼️ Qualitative Comparison
 <img src="assets/qualitative-comparison.jpg" alt="Qualitative Comparison" width="50%">
 
-## Acknowledgement
+## 🤝 Acknowledgement
 Our implementation builds upon previous open-source works on diffusion-based LiDAR generation and range image modeling, including:  
 - [LiDAR Diffusion](https://github.com/hancyran/LiDAR-Diffusion)  
 - [RangeLDM](https://github.com/WoodwindHu/RangeLDM)
