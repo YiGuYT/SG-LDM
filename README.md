@@ -48,9 +48,11 @@ We sincerely thank the authors of these projects for their valuable contribution
 If you find our work useful in your research, please consider citing:  
 
 ```bibtex
-@inproceedings{xiang2025sgldm,
-  title={{SG-LDM}: Semantic-Guided LiDAR Generation via Latent-Aligned Diffusion},
-  author={Xiang, Zhengkang and Li, Zizhao and Khodabandeh, Amir and Khoshelham, Kourosh},
-  booktitle={ICCV},
-  year={2025}
+@InProceedings{Xiang_2025_ICCV,
+    author    = {Xiang, Zhengkang and Li, Zizhao and Khodabandeh, Amir and Khoshelham, Kourosh},
+    title     = {SG-LDM: Semantic-Guided LiDAR Generation via Latent-Aligned Diffusion},
+    booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
+    month     = {October},
+    year      = {2025},
+    pages     = {24965-24976}
 }
